@@ -68,11 +68,7 @@ and check that it has actually been removed
 
 Now let's dive into real-life (or quasi-real-life) usage of Docker volumes.
 
-Let's use our `nginx2` container created previously.
-
-!!! tip
-    If you don't have this container running you can recreate it with the following command:
-    `docker container run -d -p 80:80 --name nginx2 nginx`
+`docker container run -d -p 80:80 --name nginx2 nginx`
 
 Let’s use the `docker exec` command to edit the welcome page and load it.
 
@@ -265,15 +261,4 @@ Then reload the page in the browser:
 
 ### Lab challenge
 
-__Goal__: create a service based on two containers: 
-
-1. WordPress 
-2. MariaDB 
-
-and then use your web browser to access wordpress on port 80.
-
-!!! tip
-- Create a volume `db_data` to provide persistent storage for the DBMS
-- Launch MariaDB (image name: `mariadb:10.6.4-focal`) with container name `db`, using the previously created volume, and pass environment variables to the container to configure it
-- Inspect the MariaDB container finding its private IP
-- Launch WordPress (image name: `wordpress:latest`) with container name `wordpress`, and pass environment variables to the container to configure it (using as DB host the IP of the MariaDB container).
+__Goal__: create a service based on JupyterLab tool and attach a volume to the area where you store your notebooks. That will make your results persistent, regardless of how many times you recreate the container. 

@@ -154,15 +154,3 @@ curl localhost:3000
 {"env":"ciccio"}
 ```
 ineed! All good! 
-
-### Optimize the building ( simple example ) 
-
-Now, provided that you got the repo: `git clone  https://github.com/spigad/simple-exercise.git`  you can try to optimize a bit and use the `.dockerignore` file. 
-
-So, you should create the file with the following content: 
-```
-*.md
-.git*
-```
-
-and then you can check the effect of the `.dockerignore` by comaparing the `Sending build context to Docker daemon` with and without. 

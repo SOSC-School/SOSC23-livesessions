@@ -363,20 +363,4 @@ Commercial support is available at
 
 ### Lab challenge
 
-__Goal__: create a service based on two containers: 
-
-1. WordPress 
-2. MariaDB 
-
-and then use your web browser to access wordpress on port 8080.
-
-!!! tip
-- Create a volume `db_data` to provide persistent storage for the DBMS
-- Create a network
-- Launch MariaDB (image name: `mariadb:10.6.4-focal`) with container name `db`, using the previously created volume, attaching it to the previously created network and pass environment variables to the container to configure it
-- Launch WordPress (image name: `wordpress:latest`) with container name `wordpress`, and pass environment variables to the container to configure it
-- Use the automatic DNS resolution feature of the previously created network to connect the two containers
-
- 
-
-
+__Goal__: create a service based on JupyterLab container and try to access it from the browser
