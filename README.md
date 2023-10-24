@@ -7,3 +7,7 @@
 - [Dockerfile you will use](./day1/01-docker/Dockerfile)
 - [Managing images with python and JupyterLab](./day1/02-jlab/01-ImageDataInPython.ipynb)
 - [Student project](./day1/02-jlab/02-Project-Day1.ipynb)
+
+## Day 2
+
+- [Interacting with cloud storage](./day2/01-working-with-S3_howto.ipynb)
