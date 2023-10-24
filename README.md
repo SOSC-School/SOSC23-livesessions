@@ -12,3 +12,4 @@
 
 - [Interacting with cloud storage](./day2/01-working-with-S3_howto.ipynb)
 - [Messaging](./day2/2-RequestsAndMessages.ipynb)
+- [Dask](./day2/Dask)
