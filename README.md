@@ -11,3 +11,4 @@
 ## Day 2
 
 - [Interacting with cloud storage](./day2/01-working-with-S3_howto.ipynb)
+- [Messaging](./day2/02-RequestsAndMessages.ipynb)
