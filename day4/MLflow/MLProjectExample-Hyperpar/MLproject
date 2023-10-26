@@ -1,0 +1,30 @@
+name: My Pipeline
+
+python_env: python_env.yaml
+
+entry_points:
+  download_data:
+    parameters:
+      data_url: uri
+    command: "mkdir -p output; papermill load_data.ipynb output/load_data-out.ipynb -p data_url {data_url}"
+  prepare_train_test:
+    parameters:
+      csv_path: uri
+      random_seed_value: {type: int, default: 30}
+      test_size_value: {type: float, default: 0.30}
+    command: "papermill prepare_train_test.ipynb output/prepare_train_test-out.ipynb -p random_seed {random_seed_value} -p test_size {test_size_value} -p csv_path {csv_path}"
+  train:
+    parameters:
+      csv_train_path: uri
+      csv_test_path: uri
+      alpha: {type: float, default: 0.5}
+      l1_ratio: {type: float, default: 0.1}
+    command: "papermill train.ipynb output/train-out.ipynb -p alpha {alpha} -p l1_ratio {l1_ratio} -p csv_train_path {csv_train_path} -p csv_test_path {csv_test_path}"
+  test:
+    parameters:
+      model_path: uri
+    command: "papermill test.ipynb output/test-out.ipynb -p model_path {model_path}"
+  main:
+    parameters:
+      data_url: {type: str, default: "https://raw.githubusercontent.com/mlflow/mlflow/master/tests/datasets/winequality-red.csv"}
+    command: "python main.py --data-url {data_url}"
