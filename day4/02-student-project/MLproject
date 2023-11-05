@@ -9,16 +9,16 @@ python_env: python_env.yaml
 
 entry_points:
   train:
-    #parameters:
-    #  data_path: path
-    command: "mkdir -p output; papermill notebooks/Train.ipynb output/step1-out.ipynb" 
-    # -p data_path {data_path}"
+    parameters:
+      n_epochs: int
+      batch_size: int
+    command: "mkdir -p output; papermill notebooks/Train.ipynb output/step1-out.ipynb -p n_epochs {n_epochs} --batch_size {batch_size}"
   evaluate:
     parameters:
       model_run_uri: str
     command: "mkdir -p output; papermill notebooks/Evaluate.ipynb output/step2-out.ipynb -p model_run_uri {model_run_uri}"
   main:
-    #parameters:
-    #  data_path: path
-    command: "python main.py"
-    #--data-path {data_path}"
+    parameters:
+      n_epochs: int
+      batch_size: int
+    command: "python main.py --batch_size {batch_size} --n_epochs {n_epochs}"

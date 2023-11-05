@@ -17,3 +17,4 @@
 - ## Day 4
 
 - [MLflow](./day4/MLflow)
+- [MLFlow project with Solutions](./day4/02-student-project/)
