@@ -1,18 +1,14 @@
-name: My Pipeline
+name: SOSC Pipeline
 
-python_env: python_env.yaml
-# or
-# conda_env: my_env.yaml
-# or
-# docker_env:
-#    image:  mlflow-docker-example
+docker_env:
+  image:  ghcr.io/sosc-school/sosc23-jupyterlab:latest
 
 entry_points:
   train:
     parameters:
       n_epochs: int
       batch_size: int
-    command: "mkdir -p output; papermill notebooks/Train.ipynb output/step1-out.ipynb -p n_epochs {n_epochs} --batch_size {batch_size}"
+    command: "mkdir -p output; papermill notebooks/Train.ipynb output/step1-out.ipynb -p n_epochs {n_epochs} -p batch_size {batch_size}"
   evaluate:
     parameters:
       model_run_uri: str
