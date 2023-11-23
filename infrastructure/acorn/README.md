@@ -4,5 +4,3 @@ The whole platform can be tried out for free on [acorn.io](acorn.io): [![Run in 
 
 
 ![From compose to k8s via Acorn](./sosc2023.gif)
-
-
