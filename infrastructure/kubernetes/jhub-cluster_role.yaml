@@ -1,0 +1,71 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hub
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - events
+  - persistentvolumeclaims
+  - namespaces
+  verbs:
+  - get
+  - watch
+  - list
+  - delete
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hub
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: hub
+subjects:
+- kind: ServiceAccount
+  name: jupyterhub
+  namespace: hub
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dask-cluster-role
+rules:
+  # Application: watching & handling for the custom resource we declare.
+  - apiGroups: [kubernetes.dask.org]
+    resources: [daskclusters, daskworkergroups, daskworkergroups/scale, daskjobs, daskautoscalers]
+    verbs: [get, list, watch, patch, create, delete]
+
+  # Application: other resources it needs to watch and get information from.
+  - apiGroups:
+    - ""  # indicates the core API group
+    resources: [pods, pods/status]
+    verbs:
+    - "get"
+    - "list"
+    - "watch"
+
+  - apiGroups:
+    - ""  # indicates the core API group
+    resources: [services]
+    verbs:
+    - "get"
+    - "list"
+    - "watch"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dask-cluster-role-binding-dciangot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dask-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: default # adjust name based on the service account you created
+    namespace: user-dciangot
