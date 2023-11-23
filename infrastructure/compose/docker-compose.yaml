@@ -4,8 +4,8 @@ services:
     build: 
       context: ../
       dockerfile: Dockerfile.jupyterLAB
-    expose:
-      - 8888
+    ports:
+      - 8888:8888
     command: ["bash", "-c", "start.sh jupyter lab --ServerApp.token=${JLAB_TOKEN}"]
     env_file:
       - .env
@@ -15,7 +15,7 @@ services:
   minio:
     image: quay.io/minio/minio:RELEASE.2023-11-15T20-43-25Z
     command: ["server", "--console-address", ":40093", "/data"]
-    expose:
+    ports:
       - 40093:40093
       - 9000:9000
     env_file:
@@ -30,6 +30,8 @@ services:
     command: [ "/bin/bash", "-c","mlflow server --host 0.0.0.0 --serve-artifacts --artifacts-destination s3://mlflow --backend-store-uri /data/mlflow"]
     volumes:
       - ./mlflow_exp:/data/mlflow
+    ports:
+      - 5000:5000
     env_file: .env
     environment:
       - MLFLOW_S3_ENDPOINT_URL="http://minio:9000"
@@ -37,8 +39,8 @@ services:
   nats:
     image: "docker.io/nats:2.10.5-alpine3.18"
     ports:
-      - :4222/tcp
-      - :8222/tcp
+      - 4222:4222
+      - 8222:8222
     command: ["-c", "/etc/nats/nats-server.conf", "-m", "8222"]
     volumes:
       - ./config/nats-server.conf:/etc/nats/nats-server.conf
