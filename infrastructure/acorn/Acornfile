@@ -1,0 +1,119 @@
+services: {
+	{
+		mariadb: {
+  			image: "ghcr.io/acorn-io/mariadb:v10.11.#-#"
+		}
+	},
+	{
+		s3: {
+  			image: "docker.io/dciangot/minio-acorn:v1"
+		}
+	},
+	{
+		nats: {
+  			image: "docker.io/dciangot/nats-acorn:v1"
+		}
+	},	
+}
+
+containers: {
+	mlflow: {
+		build: {
+			context: "."
+			dockerfile: "Dockerfile.mlflow"
+		}
+		consumes: ["s3", "nats", "mariadb"]
+		ports: publish: "5000/http"
+		cmd: [
+			"/bin/bash", "-c",
+			"mlflow server --host 0.0.0.0 --serve-artifacts --artifacts-destination s3://mlflow --backend-store-uri mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE}"
+		]
+		env: {
+			MLFLOW_TRACKING_USERNAME: "secret://mlflowcreds/username"
+			MLFLOW_TRACKING_PASSWORD: "secret://mlflowcreds/password"
+			MLFLOW_S3_ENDPOINT_URL: "@{service.s3.address}"
+			AWS_ACCESS_KEY_ID: "@{service.s3.secrets.admin.username}"
+			AWS_SECRET_ACCESS_KEY: "@{service.s3.secrets.admin.password}"
+			MYSQL_HOST: "@{services.mariadb.address}"
+			MYSQL_DATABASE: "@{services.mariadb.data.dbName}"
+			MYSQL_USER: "@{services.mariadb.secrets.user.username}"
+			MYSQL_PASSWORD: "@{services.mariadb.secrets.user.password}"
+			//MLFLOW_S3_IGNORE_TLS: "true"
+		}
+		probes: [
+			{
+				type:                "liveness"
+				initialDelaySeconds: 10
+				http: {
+					url: "http://localhost:5000/"
+				}
+			},
+			{
+				type:                "readiness"
+				initialDelaySeconds: 5
+				http: {
+					url: "http://localhost:5000/"
+				}
+			},
+		]
+	}
+	jupyterlab: {
+		build: {
+			context: "."
+			dockerfile: "Dockerfile"
+		}
+		consumes: ["s3", "nats", "mariadb"]
+		cmd: ["bash", "-c", "start.sh jupyter lab --ServerApp.token=${JLAB_TOKEN}"]
+		ports: publish: "8888/http"
+		env: {
+			MLFLOW_TRACKING_USERNAME: "secret://mlflowcreds/username"
+			MLFLOW_TRACKING_PASSWORD: "secret://mlflowcreds/password"
+			MLFLOW_S3_ENDPOINT_URL: "@{service.s3.address}"
+			AWS_ACCESS_KEY_ID: "@{service.s3.secrets.admin.username}"
+			AWS_SECRET_ACCESS_KEY: "@{service.s3.secrets.admin.password}"
+			NATS_HOST: "@{service.nats.address}"
+			NATS_TOKEN: "@{service.nats.secrets.admin.token}"
+			JLAB_TOKEN: "secret://jlabtoken/token"
+			//MLFLOW_S3_IGNORE_TLS: "true"
+		}
+		probes: [
+			{
+				type:                "liveness"
+				initialDelaySeconds: 10
+				http: {
+					url: "http://localhost:8888/"
+				}
+			},
+			{
+				type:                "readiness"
+				initialDelaySeconds: 5
+				http: {
+					url: "http://localhost:8888/"
+				}
+			},
+		]
+	}
+}
+
+
+secrets: jlabtoken: {
+	name:        "JLab token"
+	description: "Credentials for the admin user"
+	type:        "token"
+	params: {
+		length:     32
+		characters: "A-Za-z0-9"
+	}
+}
+
+secrets: mlflowcreds: {
+	name:        "MLFlow User Credentials"
+	description: "Credentials for the user with full access"
+	type:        "basic"
+	params: {
+		usernameLength:     11
+		usernameCharacters: "a-z"
+		passwordCharacters: "A-Za-z0-9^_-"
+	}
+	data: username: "admin"
+}

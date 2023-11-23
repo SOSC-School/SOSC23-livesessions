@@ -1,0 +1,91 @@
+name:        "Nats.io Acorn"
+description: "Acorn providing Nats.io"
+
+info: localData.info
+
+args: {
+	// Name of the user to create. If a username is not set, one is randomly generated
+	// Changing this value will have no effect on an existing instance
+	username: "admin"
+}
+
+services: nats: {
+	default:   true
+	container: "servernats"
+	secrets: ["admin"]
+	ports: ["4222", "8222"]
+	data: username: args.username
+}
+
+containers: servernats: {
+	name:        "Nats.io"
+	description: "Containerized Nats.io server"
+	image:       "docker.io/nats:2.10.5-alpine3.18"
+	cmd: ["-c", "/etc/nats/nats-server.conf", "-m", "8222"]
+	ports:       { 
+		expose: ["4222/tcp", "8222/http"]
+	}
+	dirs: "/etc/nats/": "secret://config"
+	probes: [
+		{
+			type:                "liveness"
+			initialDelaySeconds: 10
+			http: {
+				url: "http://localhost:8222/"
+			}
+		},
+		{
+			type:                "readiness"
+			initialDelaySeconds: 5
+			http: {
+				url: "http://localhost:8222/"
+			}
+		},
+	]
+}
+
+secrets: admin: {
+	name:        "Admin user credentials"
+	description: "Credentials for the admin user"
+	type:        "token"
+	params: {
+		length:     32
+		characters: "A-Za-z0-9^_-"
+	}
+	data: token: ""
+}
+
+secrets: config: {
+    type: "opaque"
+    data: {
+        "nats-server.conf": localData.natsConfig
+    }
+}
+
+
+localData: natsConfig: """
+# Client port of 4222 on all interfaces
+port: 4222
+authorization {
+	token: "@{service.s3.secrets.admin.token}"
+}
+"""
+
+localData: info: """
+## Usage
+
+```aml
+services: nats: {
+	external: "@{acorn.name}"
+}
+
+containers: app: {
+	image:    "app-image"
+	consumes: ["nats"]
+	env: {
+		NATS_HOST: "@{service.nats.address}"
+		NATS_TOKEN: "@{service.nats.secrets.admin.token}"
+	}
+}
+```
+"""

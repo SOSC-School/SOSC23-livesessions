@@ -1,0 +1,5 @@
+FROM ghcr.io/mlflow/mlflow:latest
+
+
+RUN apt update && apt-get install -y python3-mysqldb pkg-config python3-dev default-libmysqlclient-dev build-essential 
+RUN pip3 install boto3 mysqlclient 

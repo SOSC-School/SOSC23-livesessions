@@ -1,0 +1,83 @@
+name:        "MinIO Acorn"
+description: "Acorn providing MinIO"
+
+info: localData.info
+
+args: {
+	// Name of the user to create. If a username is not set, one is randomly generated
+	// Changing this value will have no effect on an existing instance
+	username: "admin"
+}
+
+services: s3: {
+	default:   true
+	container: "minio"
+	secrets: ["admin"]
+	ports: ["9000","40093"]
+	data: username: args.username
+}
+
+containers: minio: {
+	name:        "MinIO"
+	description: "Containerized MinIO server"
+	image:       "quay.io/minio/minio:RELEASE.2023-11-15T20-43-25Z"
+	cmd: ["server", "--console-address", ":40093", "/data"]
+	ports:       { 
+		expose: "9000/http"
+		publish: "40093/http"
+	}
+	env: {
+		MINIO_ROOT_USER: "@{secrets.admin.username}"
+		MINIO_ROOT_PASSWORD: "@{secrets.admin.password}"
+	}
+	dirs: "/data": "volume://s3-data"
+	probes: [
+		{
+			type:                "liveness"
+			initialDelaySeconds: 10
+			http: {
+				url: "http://localhost:40093/"
+			}
+		},
+		{
+			type:                "readiness"
+			initialDelaySeconds: 5
+			http: {
+				url: "http://localhost:40093/"
+			}
+		},
+	]
+}
+
+secrets: admin: {
+	name:        "Admin user credentials"
+	description: "Credentials for the admin user"
+	type:        "basic"
+	params: {
+		usernameLength:     11
+		usernameCharacters: "a-z"
+		passwordCharacters: "A-Za-z0-9^_-"
+	}
+	data: username: args.username 
+}
+
+
+localData: info: """
+## Usage
+
+```aml
+services: s3: {
+	external: "@{acorn.name}"
+}
+
+containers: app: {
+	image:    "app-image"
+	consumes: ["s3"]
+	env: {
+		S3_HOST: "@{service.s3.address}"
+		S3_ACCESS_KEY: "@{service.s3.secrets.admin.username}"
+		S3_ACCESS_SECRET: "@{service.s3.secrets.admin.password}"
+	}
+}
+```
+"""
